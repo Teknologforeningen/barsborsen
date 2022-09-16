@@ -1,5 +1,5 @@
 import React, { FC } from "react"
-import { StaticImage } from "gatsby-plugin-image";
+import { StaticImage } from "gatsby-plugin-image"
 
 /*
  * This component is built using `gatsby-image` to automatically serve optimized
@@ -16,23 +16,23 @@ const Collage: FC = () => {
   return (
     <>
       <StaticImage
-        src="../images/studerandecentret.jpg"
+        src="../images/studC-matchning.jpg"
         style={{ height: "100%" }}
         imgStyle={{ objectFit: "cover" }}
         alt="Illustrationsbild för Vision TF"
         loading="eager"
         placeholder="tracedSVG"
       />
-      <StaticImage
+      {/*<StaticImage
         src="../images/map-overlay.png"
         style={{ position: "absolute", top: 0, left: 0, height: "100%" }}
         imgStyle={{ objectFit: "cover" }}
         alt="Illustrationsbild för Vision TF"
         loading="eager"
         placeholder="tracedSVG"
-      />
+      />*/}
     </>
-  );
+  )
 }
 
 export default Collage
