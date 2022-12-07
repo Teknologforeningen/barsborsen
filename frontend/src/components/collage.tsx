@@ -24,18 +24,9 @@ const Collage: FC = () => {
         placeholder="tracedSVG"
       />
       <StaticImage
-        src="../images/matching-campaign-overlay.png"
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          marginLeft: "auto",
-          marginRight: "auto",
-          width: "100%",
-          maxWidth: 1000,
-        }}
-        //imgStyle={{ objectFit: "cover" }}
+        src="../images/map-overlay.png"
+        style={{ position: "absolute", top: 0, left: 0, height: "100%" }}
+        imgStyle={{ objectFit: "cover" }}
         alt="Illustrationsbild för Vision TF"
         loading="eager"
         placeholder="tracedSVG"
