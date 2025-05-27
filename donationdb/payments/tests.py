@@ -45,5 +45,5 @@ class PaymentViewTestCase(TestCase):
 
         client = Client()
         response = client.get("/payments/success", request_parameters)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
