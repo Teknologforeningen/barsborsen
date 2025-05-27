@@ -105,7 +105,8 @@ def save_donor_and_contribution(donation):
     donor = Donor(
         name = donation["name"],
         pseudonym = donation["pseudonym"],
-        email = donation["email"]
+        email = donation["email"],
+        phone = donation["phone"]
     )
     donor.full_clean()
     donor.save()

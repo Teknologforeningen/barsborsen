@@ -8,6 +8,7 @@ class Donor(models.Model):
     name = models.CharField(max_length=250)
     pseudonym = models.CharField(max_length=250, blank=True)
     email = models.CharField(max_length=250)
+    phone = models.CharField(max_length=250)
     address = models.TextField(blank=True)
     zip_code = models.CharField(max_length=250, blank=True)
     city = models.CharField(max_length=250, blank=True)
@@ -25,7 +26,7 @@ class Donor(models.Model):
 class DonorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Donor
-        fields = ["name", "pseudonym", "email", "address", "zip_code", "city", "country"]
+        fields = ["name", "pseudonym", "email", "phone", "address", "zip_code", "city", "country"]
 
 
 class Organization(models.Model):
