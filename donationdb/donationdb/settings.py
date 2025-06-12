@@ -27,8 +27,8 @@ DEBUG = os.environ.get("DONATIONDB_DEBUG", "True") == "True"
 CI = os.environ.get("CI", "False") == "True"
 
 if DEBUG == True and CI != True:
-    print("Reading environment variables from ../.env")
-    dotenv.read_dotenv("../.env")
+    print("Reading environment variables from .env")
+    dotenv.read_dotenv(".env")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ["DONATIONDB_SECRET_KEY"] if DEBUG == False else "foobar"
