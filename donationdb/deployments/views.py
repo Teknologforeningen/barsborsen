@@ -1,8 +1,9 @@
-from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+
 from deployments.helpers import build, latest_builds
 from donationdb.settings import HEROKU_APP_VISION_TF_FI, HEROKU_APP_STAGING_VISION_TF_FI
+
 
 @login_required
 def index(request):
