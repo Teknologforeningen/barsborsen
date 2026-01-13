@@ -8,7 +8,7 @@ django-cors-headers==4.7.0
 django-dotenv==1.4.2
 djangorestframework==3.16.0
 ecdsa==0.19.1
-filelock==3.18.0
+filelock==3.20.3
 gunicorn==23.0.0
 idna==3.10
 MarkupSafe==3.0.2
