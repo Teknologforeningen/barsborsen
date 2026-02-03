@@ -1,32 +1,36 @@
-FROM python:3.13-slim AS builder
+FROM python:3.14-slim AS builder
+COPY --from=ghcr.io/astral-sh/uv:0.9.28 /uv /uvx /bin/
+
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+ENV UV_NO_DEV=1
+ENV UV_PYTHON_DOWNLOADS=0
 
 WORKDIR /app
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONBUFFERED=1
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project
 
-RUN pip install --upgrade pip
+COPY . /app
 
-COPY requirements.txt .
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked
 
-RUN pip install --no-cache-dir -r requirements.txt
+FROM python:3.14-slim
 
-FROM python:3.13-slim
+RUN groupadd --system --gid 999 vision \
+ && useradd --system --gid 999 --uid 999 --create-home vision
 
-RUN useradd -r vision && mkdir /app && chown -R vision /app
+COPY --from=builder --chown=vision:vision /app /app
 
-COPY --from=builder /usr/local/lib/python3.13/site-packages/ /usr/local/lib/python3.13/site-packages/
-COPY --from=builder /usr/local/bin/ /usr/local/bin/
-
-WORKDIR /app
-
-COPY . .
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONBUFFERED=1
+ENV PATH="/app/.venv/bin:$PATH"
 
 USER vision
 
+WORKDIR /app
+
 EXPOSE 8000
 
-CMD ["/usr/local/bin/gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "donationdb.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "donationdb.wsgi:application"]
