@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-from dotenv import load_dotenv
 from pathlib import Path
 import os
 import dj_database_url
@@ -28,6 +27,8 @@ CI = os.environ.get("CI", "False") == "True"
 
 if DEBUG == True and CI != True:
     print("Reading environment variables from .env")
+    from dotenv import load_dotenv
+
     load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
