@@ -1,6 +1,4 @@
 from django.db import models
-from django.db.models.aggregates import Sum
-from donations.models import Contribution
 from donations.models import ContributionSerializer
 from rest_framework import serializers
 
@@ -13,19 +11,19 @@ class Transaction(models.Model):
         ["ok", "ok"],
         ["fail", "fail"],
         ["pending", "pending"],
-        ["delayed", "delayed"]
+        ["delayed", "delayed"],
     ]
     status = models.TextField(choices=STATUS_CHOICES)
-    contribution = models.ForeignKey(to="donations.Contribution", blank=True, on_delete=models.CASCADE)
+    contribution = models.ForeignKey(
+        to="donations.Contribution", blank=True, on_delete=models.CASCADE
+    )
     confirmation_email_sent = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        indexes = [
-            models.Index(fields=["checkout_transaction_id"])
-        ]
+        indexes = [models.Index(fields=["checkout_transaction_id"])]
 
     def __str__(self):
         return f"{self.contribution} ({self.status})"
