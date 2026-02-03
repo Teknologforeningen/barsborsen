@@ -1,8 +1,10 @@
+import statistics
 from django.apps import apps
 from django.db import models
 from django.db.models.aggregates import Sum
 from django.db.models.query_utils import Q
 from rest_framework import serializers
+
 
 class Donor(models.Model):
     name = models.CharField(max_length=250)
@@ -18,15 +20,24 @@ class Donor(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name if self.pseudonym == "" else (
-            f"{self.name} ({self.pseudonym})"
+        return (
+            self.name if self.pseudonym == "" else (f"{self.name} ({self.pseudonym})")
         )
 
 
 class DonorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Donor
-        fields = ["name", "pseudonym", "email", "phone", "address", "zip_code", "city", "country"]
+        fields = [
+            "name",
+            "pseudonym",
+            "email",
+            "phone",
+            "address",
+            "zip_code",
+            "city",
+            "country",
+        ]
 
 
 class Organization(models.Model):
@@ -47,15 +58,12 @@ class Contribution(models.Model):
     VISIBILITY_CHOICES = [
         ["visible", "visible"],
         ["pseudonym", "pseudonym"],
-        ["anonymous", "anonymous"]
+        ["anonymous", "anonymous"],
     ]
 
     donor = models.ForeignKey(Donor, on_delete=models.CASCADE)
     organization = models.ForeignKey(
-        Organization,
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE
+        Organization, null=True, blank=True, on_delete=models.CASCADE
     )
 
     visibility = models.TextField(choices=VISIBILITY_CHOICES)
@@ -66,28 +74,30 @@ class Contribution(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @staticmethod
     def valid_contributions():
-        Transaction = apps.get_model("payments", "Transaction")
         return (
-            Contribution.objects
-                .exclude(
-                    Q(transaction__status="new") |
-                    Q(transaction__status="fail") |
-                    Q(transaction__status="pending") |
-                    Q(transaction__status="delayed")
-                )
-                .order_by("-id")
+            Contribution.objects.filter(transaction__isnull=False)
+            .exclude(transaction__status__in=["new", "fail", "pending", "delayed"])
+            .order_by("-id")
         )
 
+    @staticmethod
     def total_sum():
-        sum_from_transactions = (Contribution.valid_contributions()
-            .aggregate(contribution_sum=Sum("sum"))["contribution_sum"]
-        )
-        return sum_from_transactions
+        return Contribution.valid_contributions().aggregate(
+            contribution_sum=Sum("sum")
+        )["contribution_sum"]
 
     def display_name(self):
-        return self.organization.name if (self.organization is not None) else \
-            self.donor.pseudonym if self.visibility == "pseudonym" else self.donor.name
+        return (
+            self.organization.name
+            if (self.organization is not None)
+            else (
+                self.donor.pseudonym
+                if self.visibility == "pseudonym"
+                else self.donor.name
+            )
+        )
 
     def __str__(self):
         organization_or_name = f"{self.display_name()}: {self.sum} €"
@@ -96,16 +106,14 @@ class Contribution(models.Model):
 
 class ContributionSerializer(serializers.ModelSerializer):
     donor = DonorSerializer()
+
     class Meta:
         model = Contribution
         fields = ["donor", "visibility", "sum", "greeting", "group_name"]
 
 
 class DonationLetter(models.Model):
-    VISIBILITY_CHOICES = [
-        ["visible", "visible"],
-        ["anonymous", "anonymous"]
-    ]
+    VISIBILITY_CHOICES = [["visible", "visible"], ["anonymous", "anonymous"]]
 
     contribution = models.ForeignKey(Contribution, on_delete=models.CASCADE)
     payment_date = models.DateTimeField(blank=True, null=True)
@@ -116,14 +124,17 @@ class DonationLetter(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def total_sum():
-        sum = (DonationLetter.objects.all()
+        sum = (
+            DonationLetter.objects.all()
             .prefetch_related("contribution")
             .aggregate(contribution_sum=Sum("contribution__sum"))["contribution_sum"]
         )
         return 0 if sum == None else sum
 
     def __str__(self):
-        organization_or_name = \
-            f"{self.contribution.organization.name}: {self.contribution.sum} € ({self.created_at.date()})" if (self.contribution.organization is not None) \
+        organization_or_name = (
+            f"{self.contribution.organization.name}: {self.contribution.sum} € ({self.created_at.date()})"
+            if (self.contribution.organization is not None)
             else f"{self.contribution.donor.name}: {self.contribution.sum} € ({self.created_at.date()})"
+        )
         return organization_or_name
